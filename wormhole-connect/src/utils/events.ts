@@ -7,14 +7,17 @@ import {
   SeiContext,
   WormholeContext,
 } from '@wormhole-foundation/wormhole-connect-sdk';
-import { ParsedMessage, ParsedRelayerMessage, PayloadType, wh } from './sdk';
+import { PayloadType, wh } from './sdk';
 import { fromNormalizedDecimals } from '.';
 import { CHAINS } from 'config';
 import { fetchGlobalTx, getEmitterAndSequence } from './vaa';
 import { isEvmChain } from 'utils/sdk';
+import { isCosmWasmChain } from './cosmos';
+import { CosmosGatewayRoute } from './routes/cosmosGateway';
+import { SignedMessage } from './routes/types';
 
 export const fetchRedeemTx = async (
-  txData: ParsedMessage | ParsedRelayerMessage,
+  txData: SignedMessage,
 ): Promise<{ transactionHash: string } | null> => {
   let transactionHash: string | undefined;
   try {
@@ -35,7 +38,7 @@ export const fetchRedeemTx = async (
 };
 
 export const fetchRedeemedEvent = async (
-  txData: ParsedMessage | ParsedRelayerMessage,
+  txData: SignedMessage,
 ): Promise<{ transactionHash: string } | null> => {
   const messageId = getEmitterAndSequence(txData);
   const { emitterChain, emitterAddress, sequence } = messageId;
@@ -79,6 +82,9 @@ export const fetchRedeemedEvent = async (
       sequence,
     );
     return transactionHash ? { transactionHash } : null;
+  } else if (isCosmWasmChain(txData.toChain)) {
+    const hash = await new CosmosGatewayRoute().fetchRedeemedEvent(txData);
+    return hash ? { transactionHash: hash } : null;
   } else {
     const provider = wh.mustGetProvider(txData.toChain);
     const context: any = wh.getContext(
@@ -101,9 +107,7 @@ export const fetchRedeemedEvent = async (
   }
 };
 
-export const fetchSwapEvent = async (
-  txData: ParsedMessage | ParsedRelayerMessage,
-) => {
+export const fetchSwapEvent = async (txData: SignedMessage) => {
   const { tokenId, recipient, amount, tokenDecimals } = txData;
   if (txData.toChain === 'sui') {
     const context = wh.getContext(

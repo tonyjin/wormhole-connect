@@ -24,6 +24,7 @@ import Spacer from 'components/Spacer';
 import WalletsModal from '../WalletModal';
 import Header from './Header';
 import { estimateClaimGas } from 'utils/gas';
+import { isCosmWasmChain } from '../../utils/cosmos';
 
 function SendTo() {
   const dispatch = useDispatch();
@@ -100,8 +101,11 @@ function SendTo() {
 
   const AUTOMATIC_DEPOSIT = useMemo(() => {
     if (!routeName) return false;
-    return RouteOperator.getRoute(routeName).AUTOMATIC_DEPOSIT;
-  }, [routeName]);
+    return (
+      RouteOperator.getRoute(routeName).AUTOMATIC_DEPOSIT ||
+      isCosmWasmChain(txData.toChain)
+    );
+  }, [routeName, txData]);
 
   const claim = async () => {
     setInProgress(true);
