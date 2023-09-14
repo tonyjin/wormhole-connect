@@ -635,9 +635,11 @@ export class CosmosGatewayRoute extends BaseRoute {
     };
   }
 
-  async fetchRedeemedEvent(
-    message: SignedTokenTransferMessage | SignedRelayTransferMessage,
-  ): Promise<string | null> {
+  async fetchRedeemedEvent(message: SignedMessage): Promise<string | null> {
+    if (!isSignedWormholeMessage(message)) {
+      throw new Error('Signed message is not for gateway');
+    }
+
     return isCosmWasmChain(message.fromChain)
       ? this.fetchRedeemedEventCosmosSource(message)
       : this.fetchRedeemedEventNonCosmosSource(message);

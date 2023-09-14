@@ -13,10 +13,10 @@ import { CHAINS } from 'config';
 import { fetchGlobalTx, getEmitterAndSequence } from './vaa';
 import { isEvmChain } from 'utils/sdk';
 import { isCosmWasmChain } from './cosmos';
-import { CosmosGatewayRoute, SignedTokenTransferMessage } from './routes';
+import { CosmosGatewayRoute, SignedMessage } from './routes';
 
 export const fetchRedeemTx = async (
-  txData: SignedTokenTransferMessage,
+  txData: SignedMessage,
 ): Promise<{ transactionHash: string } | null> => {
   let transactionHash: string | undefined;
   try {
@@ -37,7 +37,7 @@ export const fetchRedeemTx = async (
 };
 
 export const fetchRedeemedEvent = async (
-  txData: SignedTokenTransferMessage,
+  txData: SignedMessage,
 ): Promise<{ transactionHash: string } | null> => {
   const messageId = getEmitterAndSequence(txData);
   const { emitterChain, emitterAddress, sequence } = messageId;
@@ -106,7 +106,7 @@ export const fetchRedeemedEvent = async (
   }
 };
 
-export const fetchSwapEvent = async (txData: SignedTokenTransferMessage) => {
+export const fetchSwapEvent = async (txData: SignedMessage) => {
   const { tokenId, recipient, amount, tokenDecimals } = txData;
   if (txData.toChain === 'sui') {
     const context = wh.getContext(
