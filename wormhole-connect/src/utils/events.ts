@@ -13,7 +13,8 @@ import { CHAINS } from 'config';
 import { fetchGlobalTx, getEmitterAndSequence } from './vaa';
 import { isEvmChain } from 'utils/sdk';
 import { isCosmWasmChain } from './cosmos';
-import { CosmosGatewayRoute, SignedMessage } from './routes';
+import { CosmosGatewayRoute } from './routes/cosmosGateway';
+import { SignedMessage } from './routes/types';
 
 export const fetchRedeemTx = async (
   txData: SignedMessage,
